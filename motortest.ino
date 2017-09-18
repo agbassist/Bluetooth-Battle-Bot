@@ -23,6 +23,7 @@ For use with the Adafruit Motor Shield v2
 #define ADAFRUITBLE_REQ 10
 #define ADAFRUITBLE_RDY 2     // This should be an interrupt pin, on Uno thats #2 or #3
 #define ADAFRUITBLE_RST 9
+#define BUCKETSIZE 32
 
 Adafruit_BLE_UART BTLEserial = Adafruit_BLE_UART(ADAFRUITBLE_REQ, ADAFRUITBLE_RDY, ADAFRUITBLE_RST);
 
@@ -61,8 +62,6 @@ void setup() {
   myMotor->run(RELEASE);
   myMotor2->run(RELEASE);
   
-  // Buckets of speed on range [0,255]
-  BUCKETSIZE = 32;
 }
 
 aci_evt_opcode_t laststatus = ACI_EVT_DISCONNECTED;
