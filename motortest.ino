@@ -127,7 +127,7 @@ void loop() {
         myMotor->run(FORWARD);
       }
       else{
-        speed_left = 2 * left_byte;
+        speed_left = 2 * (127 - left_byte);
         myMotor->run(BACKWARD);
       }
       if(right_byte > 0b01111111){
@@ -135,7 +135,7 @@ void loop() {
         myMotor2->run(FORWARD);
       }
       else{
-        speed_right = 2 * right_byte;
+        speed_right = 2 * (127 - right_byte);
         myMotor2->run(BACKWARD);
       }
       
