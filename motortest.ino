@@ -60,6 +60,9 @@ void setup() {
   // turn on motor
   myMotor->run(RELEASE);
   myMotor2->run(RELEASE);
+  
+  // Buckets of speed on range [0,255]
+  BUCKETSIZE = 32;
 }
 
 aci_evt_opcode_t laststatus = ACI_EVT_DISCONNECTED;
@@ -94,12 +97,20 @@ void loop() {
     }
     // OK while we still have something to read, get a character and print it out
     while (BTLEserial.available()) {
+      // Control_input
+      char ctl_byte = BTLEserial.read();
       
+      // Left_input
+      char left_byte = BTLEserial.read();
+      
+      // Right input
+      char right_byte = BTLEserial.read();
+      /*
       char c = BTLEserial.read();
       BTLEserial.read();
 
       Serial.println(c);
-
+      
       char motor_left = c & 0x07;
       
       char motor_right = c & 0x38;
@@ -107,14 +118,36 @@ void loop() {
       
       char control = c & 0xD0;
       control = control >> 6;
+      */
       
-      myMotor->run(FORWARD);
-      myMotor2->run(FORWARD);
-      myMotor->setSpeed( getSpeed( motor_left ) );  
-      myMotor2->setSpeed(getSpeed( motor_right ));
+      // Actual values for motor speeds
+      char speed_left, speed_right;
+      
+      if(left_byte > 0b01111111){
+        speed_left = 2 * (left_byte-128);
+        myMotor->run(FORWARD);
+      }
+      else{
+        speed_left = 2 * left_byte;
+        myMotor->run(BACKWARD);
+      }
+      if(right_byte > 0b01111111){
+        speed_right = 2 * (right_byte - 128);
+        myMotor2->run(FORWARD);
+      }
+      else{
+        speed_right = 2 * right_byte;
+        myMotor2->run(BACKWARD);
+      }
+      
+      myMotor->setSpeed( mapSpeed( speed_left, BUCKETSIZE ) );  
+      myMotor2->setSpeed(mapSpeed( speed_right, BUCKETSIZE ));
 
-      delay(1000);
+      delay(500);
 
+      // Stop until next command sequence
+      myMotor->setSpeed(0);
+      myMotor2->setSpeed(0);
       /*
       myMotor->setSpeed(0);  
       myMotor2->setSpeed(0);
@@ -126,12 +159,7 @@ void loop() {
   }
 }
 
-int getSpeed( char input ) {
-
-  if( input == 0 ) {
-    return 0;
-  }
-
-  return ( 32 * input ) - 1; 
+int mapSpeed( char input, short bucketsize ) {
+  return ( bucketsize * (input/bucketsize)); 
 }
 
