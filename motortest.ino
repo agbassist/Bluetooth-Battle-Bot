@@ -6,7 +6,7 @@ It won't work with v1.x motor shields! Only for the v2's with built in PWM
 control
 
 For use with the Adafruit Motor Shield v2 
----->	http://www.adafruit.com/products/1438
+---->  http://www.adafruit.com/products/1438
 */
 
 #include <Wire.h>
@@ -23,7 +23,7 @@ For use with the Adafruit Motor Shield v2
 #define ADAFRUITBLE_REQ 10
 #define ADAFRUITBLE_RDY 2     // This should be an interrupt pin, on Uno thats #2 or #3
 #define ADAFRUITBLE_RST 9
-#define BUCKETSIZE 32
+#define BUCKETSIZE 16
 
 Adafruit_BLE_UART BTLEserial = Adafruit_BLE_UART(ADAFRUITBLE_REQ, ADAFRUITBLE_RDY, ADAFRUITBLE_RST);
 
@@ -36,9 +36,9 @@ Adafruit_MotorShield AFMS = Adafruit_MotorShield();
 // Adafruit_MotorShield AFMS = Adafruit_MotorShield(0x61); 
 
 // Select which 'port' M1, M2, M3 or M4. In this case, M1
-Adafruit_DCMotor *myMotor = AFMS.getMotor(1);
+Adafruit_DCMotor *left_motor = AFMS.getMotor(2);
 // You can also make another motor on port M2
-Adafruit_DCMotor *myMotor2 = AFMS.getMotor(2);
+Adafruit_DCMotor *right_motor = AFMS.getMotor(1);
 
 
 
@@ -54,13 +54,13 @@ void setup() {
   AFMS.begin();  // create with the default frequency 1.6KHz
   
   // Set the speed to start, from 0 (off) to 255 (max speed)
-  myMotor->setSpeed(200);
-  myMotor2->setSpeed(200);
-  myMotor->run(FORWARD);
-  myMotor2->run(FORWARD);
+  left_motor->setSpeed(200);
+  right_motor->setSpeed(200);
+  left_motor->run(FORWARD);
+  right_motor->run(FORWARD);
   // turn on motor
-  myMotor->run(RELEASE);
-  myMotor2->run(RELEASE);
+  left_motor->run(RELEASE);
+  right_motor->run(RELEASE);
   
 }
 
@@ -97,13 +97,20 @@ void loop() {
     // OK while we still have something to read, get a character and print it out
     while (BTLEserial.available()) {
       // Control_input
-      char ctl_byte = BTLEserial.read();
+      byte ctl_byte = BTLEserial.read();
+      Serial.print("CTL: "); Serial.println(ctl_byte);
       
       // Left_input
-      char left_byte = BTLEserial.read();
+      byte left_byte = BTLEserial.read();
+      Serial.print("LEFT: "); Serial.println(left_byte);
       
       // Right input
-      char right_byte = BTLEserial.read();
+      byte right_byte = BTLEserial.read();
+      Serial.print("RIGHT: "); Serial.println(right_byte);
+      
+      // Right input
+      byte extra_byte = BTLEserial.read();
+      Serial.print("EXTRA: "); Serial.println(extra_byte);
       /*
       char c = BTLEserial.read();
       BTLEserial.read();
@@ -120,33 +127,33 @@ void loop() {
       */
       
       // Actual values for motor speeds
-      char speed_left, speed_right;
+      int speed_left, speed_right;
       
-      if(left_byte > 0b01111111){
+      if(left_byte > 127){
         speed_left = 2 * (left_byte-128);
-        myMotor->run(FORWARD);
+        left_motor->run(BACKWARD);
       }
       else{
         speed_left = 2 * (127 - left_byte);
-        myMotor->run(BACKWARD);
+        left_motor->run(FORWARD);
       }
-      if(right_byte > 0b01111111){
+      if(right_byte > 127){
         speed_right = 2 * (right_byte - 128);
-        myMotor2->run(FORWARD);
+        right_motor->run(BACKWARD);
       }
       else{
         speed_right = 2 * (127 - right_byte);
-        myMotor2->run(BACKWARD);
+        right_motor->run(FORWARD);
       }
       
-      myMotor->setSpeed( mapSpeed( speed_left, BUCKETSIZE ) );  
-      myMotor2->setSpeed(mapSpeed( speed_right, BUCKETSIZE ));
+      left_motor->setSpeed( mapSpeed( speed_left, BUCKETSIZE ) );  
+      right_motor->setSpeed(mapSpeed( speed_right, BUCKETSIZE ));
 
       delay(500);
 
       // Stop until next command sequence
-      myMotor->setSpeed(0);
-      myMotor2->setSpeed(0);
+      left_motor->setSpeed(0);
+      right_motor->setSpeed(0);
       /*
       myMotor->setSpeed(0);  
       myMotor2->setSpeed(0);
@@ -158,7 +165,7 @@ void loop() {
   }
 }
 
-int mapSpeed( char input, short bucketsize ) {
+int mapSpeed( int input, short bucketsize ) {
   return ( bucketsize * (input/bucketsize)); 
 }
 
