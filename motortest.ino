@@ -1,10 +1,10 @@
 #include <Adafruit_BLE_UART.h>
+#include "DFRobotDFPlayerMini.h"
 
 /* 
 This is a test sketch for the Adafruit assembled Motor Shield for Arduino v2
 It won't work with v1.x motor shields! Only for the v2's with built in PWM
 control
-
 For use with the Adafruit Motor Shield v2 
 ---->  http://www.adafruit.com/products/1438
 */
@@ -15,6 +15,7 @@ For use with the Adafruit Motor Shield v2
 
 #include <SPI.h>
 #include "Adafruit_BLE_UART.h"
+#include "SoftwareSerial.h"
 
 // BLUETOOTH
 
@@ -23,7 +24,11 @@ For use with the Adafruit Motor Shield v2
 #define ADAFRUITBLE_REQ 10
 #define ADAFRUITBLE_RDY 2     // This should be an interrupt pin, on Uno thats #2 or #3
 #define ADAFRUITBLE_RST 9
-#define BUCKETSIZE 16
+#define BUCKETSIZE 64
+#define SPEAKERPIN 7
+
+int on = 0;
+
 
 Adafruit_BLE_UART BTLEserial = Adafruit_BLE_UART(ADAFRUITBLE_REQ, ADAFRUITBLE_RDY, ADAFRUITBLE_RST);
 
@@ -40,14 +45,20 @@ Adafruit_DCMotor *left_motor = AFMS.getMotor(2);
 // You can also make another motor on port M2
 Adafruit_DCMotor *right_motor = AFMS.getMotor(1);
 
-
-
 void setup() {
+  SoftwareSerial mySoftwareSerial(5, 6); 
+  DFRobotDFPlayerMini myDFPlayer;
+  mySoftwareSerial.begin(9600);
+  myDFPlayer.begin(mySoftwareSerial);
+  myDFPlayer.volume(30);
+  myDFPlayer.play(1);
+  myDFPlayer.enableLoopAll();
+  
   Serial.begin(9600);           // set up Serial library at 9600 bps
   while(!Serial); // Leonardo/Micro should wait for serial init
   Serial.println(F("Bluetooth control test."));
 
-  BTLEserial.setDeviceName("NEWNAME");
+  BTLEserial.setDeviceName("ABCSBOT");
   BTLEserial.begin();
   
   // Set a default frequency
@@ -61,6 +72,10 @@ void setup() {
   // turn on motor
   left_motor->run(RELEASE);
   right_motor->run(RELEASE);
+
+  // Set up power for the speaker
+  pinMode(SPEAKERPIN, OUTPUT);
+  digitalWrite(SPEAKERPIN, HIGH);
   
 }
 
@@ -78,6 +93,8 @@ void loop() {
     // print it out!
     if (status == ACI_EVT_DEVICE_STARTED) {
         Serial.println(F("* Advertising started"));
+        left_motor->setSpeed(0);
+        right_motor->setSpeed(0);
     }
     if (status == ACI_EVT_CONNECTED) {
         Serial.println(F("* Connected!"));
@@ -97,8 +114,8 @@ void loop() {
     // OK while we still have something to read, get a character and print it out
     while (BTLEserial.available()) {
       // Control_input
-      byte ctl_byte = BTLEserial.read();
-      Serial.print("CTL: "); Serial.println(ctl_byte);
+      byte auth_byte = BTLEserial.read();
+      Serial.print("CTL: "); Serial.println(auth_byte);
       
       // Left_input
       byte left_byte = BTLEserial.read();
@@ -109,12 +126,23 @@ void loop() {
       Serial.print("RIGHT: "); Serial.println(right_byte);
       
       // Right input
-      byte extra_byte = BTLEserial.read();
-      Serial.print("EXTRA: "); Serial.println(extra_byte);
+      byte ctl_byte = BTLEserial.read();
+      Serial.print("EXTRA: "); Serial.println(ctl_byte);
+
+      /*
+      if (1 == ctl_byte){
+        
+      }
+      else if( 0 == ctl_byte){
+        // Kill speaker
+        digitalWrite(SPEAKERPIN, HIGH);
+        on = 0;
+      }
+      */
+      
       /*
       char c = BTLEserial.read();
       BTLEserial.read();
-
       Serial.println(c);
       
       char motor_left = c & 0x07;
@@ -149,11 +177,11 @@ void loop() {
       left_motor->setSpeed( mapSpeed( speed_left, BUCKETSIZE ) );  
       right_motor->setSpeed(mapSpeed( speed_right, BUCKETSIZE ));
 
-      delay(500);
+      //delay(500);
 
       // Stop until next command sequence
-      left_motor->setSpeed(0);
-      right_motor->setSpeed(0);
+      //left_motor->setSpeed(0);
+      //right_motor->setSpeed(0);
       /*
       myMotor->setSpeed(0);  
       myMotor2->setSpeed(0);
@@ -168,4 +196,3 @@ void loop() {
 int mapSpeed( int input, short bucketsize ) {
   return ( bucketsize * (input/bucketsize)); 
 }
-
