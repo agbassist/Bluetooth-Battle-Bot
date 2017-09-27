@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.example.s580l129.robot_lab3.MainActivity">
+
+    <Button
+        android:id="@+id/buttonRight"
+        android:layout_width="wrap_content"
+        android:layout_height="fill_parent"
+        android:text="Right"
+        android:layout_alignParentRight="true"
+        android:onClick="sendClick"
+        />
+
+    <Button
+        android:id="@+id/buttonLeft"
+        android:layout_width="wrap_content"
+        android:layout_height="fill_parent"
+        android:text="Left"
+        android:layout_alignParentLeft="true"
+        android:onClick="sendClick"
+        />
+
+    <TextView
+        android:id="@+id/textLeft"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
+
+        android:layout_toEndOf="@+id/buttonLeft"
+        android:text="128" />
+
+    <TextView
+        android:id="@+id/textRight"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
+        android:layout_toStartOf="@+id/buttonRight"
+        android:text="128" />
+
+    <TextView
+        android:id="@+id/textStatus"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="status_bar"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true" />
+
+    <Button
+        android:id="@+id/F"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/textLeft"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="27dp"
+        android:text="F"
+        android:onClick="sendClick"
+        />
+
+    <Button
+        android:id="@+id/S"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="14dp"
+        android:text="S"
+        android:layout_below="@+id/L"
+        android:layout_toEndOf="@+id/L"
+        android:onClick="sendClick"
+        />
+
+    <Button
+        android:id="@+id/R"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="R"
+        android:layout_alignBaseline="@+id/textRight"
+        android:layout_alignBottom="@+id/textRight"
+        android:layout_toEndOf="@+id/S"
+        android:onClick="sendClick"
+        />
+
+    <Button
+        android:id="@+id/L"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="L"
+        android:layout_alignBaseline="@+id/buttonLeft"
+        android:layout_alignBottom="@+id/buttonLeft"
+        android:layout_toStartOf="@+id/F"
+        android:onClick="sendClick"
+        />
+
+    <Button
+        android:id="@+id/connectButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_toEndOf="@+id/buttonLeft"
+        android:text="Connect"
+        android:onClick="bluetoothClick"/>
+
+    <Button
+        android:id="@+id/musicButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_toStartOf="@+id/buttonRight"
+        android:text="Music"
+        android:onClick="toggleMusic"/>
+
+</RelativeLayout>
